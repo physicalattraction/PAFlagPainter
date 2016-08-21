@@ -771,7 +771,7 @@ def paint_rounded_bar():
 
 if __name__ == '__main__':
 
-    paint_european_flags = True
+    paint_european_flags = PainterUtils.read_config('paint_european_flags')
 
     if paint_european_flags:
         paint_flag_albania()
