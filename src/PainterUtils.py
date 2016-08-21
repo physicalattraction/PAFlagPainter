@@ -4,7 +4,9 @@ Created on Jun 30, 2015
 @author: Erwin Rossen
 """
 
+import json
 import os.path
+import shutil
 from PIL import Image, ImageChops
 
 
@@ -14,6 +16,20 @@ def append_default_extension(filename, default_extension='.png'):
         return filename
     else:
         return filename + default_extension
+
+
+def get_config_file(return_default_config_file=False):
+    """Return the config file in use. Copy from default config if it does not exist yet."""
+    src_dir = os.path.dirname(__file__)
+    config_dir = os.path.join(src_dir, '..', 'config')
+    config_file = os.path.join(config_dir, 'config.json')
+    default_config_file = os.path.join(config_dir, 'default_config.json')
+    if return_default_config_file:
+        return default_config_file
+    else:
+        if not os.path.exists(config_file):
+            shutil.copyfile(default_config_file, config_file)
+        return config_file
 
 
 def get_img_dir(dir_name):
@@ -78,5 +94,21 @@ def trim_img(img):
     return img
 
 
+def read_config(field):
+    """Read a field from the config file"""
+    with open(get_config_file(), 'r') as file:
+        config = json.load(file)
+    if field in config:
+        return config[field]
+
+    # If the field is not defined, copy it from the default config file and save it.
+    with open(get_config_file(return_default_config_file=True)) as file:
+        default_config = json.load(file)
+        config[field] = default_config[field]
+    with open(get_config_file(), 'w') as file:
+        json.dump(config, file, indent=2)
+    return config[field]
+
+
 if __name__ == '__main__':
-    pass
+    print(read_config('width'))
